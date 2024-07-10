@@ -221,13 +221,21 @@ class SiTiCalculator:
             float: SI
         """
         # TODO: check array dimensions
-
+        
         # calculate horizontal/vertical operators
         sob_x = ndimage.sobel(frame_data, axis=0)
+        center_y, center_x = frame_data.shape[0] // 3, frame_data.shape[1] // 3
         sob_y = ndimage.sobel(frame_data, axis=1)
 
         # crop output to valid window, calculate gradient magnitude
+        gradient_magnitude = np.hypot(sob_x, sob_y)[1:-1, 1:-1]
+
+        mean = np.mean(gradient_magnitude)
+
+        gradient_sum = np.sum(gradient_magnitude)
+
         si = np.hypot(sob_x, sob_y)[1:-1, 1:-1].std()
+
         return si
 
     @staticmethod
@@ -250,7 +258,37 @@ class SiTiCalculator:
         if previous_frame_data is None:
             return None
         else:
-            return cast(np.ndarray, frame_data - previous_frame_data).std()
+            center_x = frame_data.shape[1] // 28
+            center_y = frame_data.shape[0] // 28
+
+        # Log values for the center pixel
+            print(f"input data {frame_data[0,0]}")
+          
+            diff = frame_data - previous_frame_data
+            print(f"motion matrix {diff[0,0]}")
+            print(f"Size of difference matrix: {diff.size}")
+            mean_diff = diff.mean()
+            val = diff - mean_diff
+            print(f"Mean of difference matrix: {mean_diff}")
+            print(f"Val : {val}")
+            squared_diff = val ** 2
+            print(f"Squared differences (first pixel): {squared_diff[0,0]}")
+            print(f"Squared differences (2 pixel): {squared_diff[0,1]}")
+            print(f"Squared differences (3 pixel): {squared_diff[0,2]}")
+            print(f"Squared differences (4 pixel): {squared_diff[0,3]}")
+            print(f"Squared differences (5 pixel): {squared_diff[0,4]}")
+            print(f"Squared differences (6 pixel): {squared_diff[0,5]}")
+            print(f"Squared differences (7 pixel): {squared_diff[0,6]}")
+            print(f"Squared differences (8 pixel): {squared_diff[0,7]}")
+            print(f"Squared differences (9 pixel): {squared_diff[0,8]}")
+            print(f"Squared differences (10 pixel): {squared_diff[0,9]}")
+            sum_squared_diff = squared_diff.sum()
+            print(f"sum of Squared differences  {sum_squared_diff}")
+            print(f"std of Squared differences ({(sum_squared_diff/diff.size)**0.5}")
+
+            print(f"std value {diff.std()}")
+            return diff.std()
+          
 
     @staticmethod
     def eotf_1886(
